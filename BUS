@@ -136,9 +136,9 @@ class Plus(Node):
 
     def grow(plist, new_plist):
         for i in plist:
-            if(isinstance(i,Var) or isinstance(i,Plus) or isinstance(i,Times)):
+            if(isinstance(i,Var) or isinstance(i,Plus) or isinstance(i,Times)or isinstance(i, Ite)):
                 for j in plist:
-                    if (isinstance(j, Var) or isinstance(j, Plus) or isinstance(j, Times)):
+                    if (isinstance(j, Var) or isinstance(j, Plus) or isinstance(j, Times)or isinstance(j, Ite)):
                         new_plist.append(Plus(i,j))
                         #print("plus")
 
@@ -156,9 +156,9 @@ class Times(Node):
 
     def grow(plist, new_plist):
         for i in plist:
-            if (isinstance(i, Var) or isinstance(i, Plus) or isinstance(i, Times) ):
+            if (isinstance(i, Var) or isinstance(i, Plus) or isinstance(i, Times) or isinstance(i, Ite) ):
                  for j in plist:
-                    if (isinstance(j, Var) or isinstance(j, Plus) or isinstance(j, Times)or isinstance(j, Num)):
+                    if (isinstance(j, Var) or isinstance(j, Plus) or isinstance(j, Times)or isinstance(j, Num)or isinstance(j, Ite)):
                         new_plist.append(Times(i, j))
                         #print("times")
 
