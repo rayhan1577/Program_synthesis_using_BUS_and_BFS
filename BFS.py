@@ -21,6 +21,11 @@ class Not(Node):
 
     def grow(p,integer_values):
         new_plist=[]
+        if('B' in p.left.toString() or 'S' in p.left.toString()):
+            x = p.left.grow()
+            for i in x:
+                new_plist.append(Not(i))
+        return new_plist
 
 
 
@@ -39,11 +44,15 @@ class And(Node):
 
     def grow(p,integer_values):
         new_plist=[]
-        if (isinstance(p.left, Var) and p.left.toString()=='B'):
-            new_plist.append(And(Var('B'), Var('B'))
-            new_plist.append(Not(Var('B')))
-            new_plist.append(Ite(Not(Var('B')), p.true_case, p.false_case))
-
+        if('B' in p.left.toString() or 'S' in p.left.toString()):
+            x=p.left.grow()
+            for i in x:
+                new_plist.append(And(i, p.right))
+        elif('B' in p.right.toString() or 'S' in p.right.toString()):
+            x=p.right.grow()
+            for i in x:
+                new_plist.append(And(p.left, i))
+        return  new_plist
 
 
 class Lt(Node):
@@ -88,11 +97,7 @@ class Ite(Node):
 
     def grow(p,integer_values):
         new_plist=[]
-        if(isinstance(p.condition,Var)):
-            new_plist.append(Ite(Lt(Var('S'),Var('S')),p.true_case,p.false_case))
-            new_plist.append(Ite(And(Var('B'),Var('B')),p.true_case,p.false_case))
-            new_plist.append(Ite(Not(Var('B')),p.true_case,p.false_case))
-        elif(isinstance(p.condition,Lt) or isinstance(p.condition, Not)):
+        if((isinstance(p.condition,Var)and p.condition.toString()=='B') or isinstance(p.condition,Lt) or isinstance(p.condition, Not)):
             x=p.grow(integer_values)
             for i in x:
                 new_plist.append(Ite(i,p.true_case,p.false_case))
@@ -143,9 +148,9 @@ class Var(Node):
             new_plist.append(Times(Var('S'), Var('S')))
             new_plist.append(Ite(Var('B'), Var('S'),Var('S')))
         elif(p.toString()=='B'):
-            new_plist.append(Ite(Lt(Var('S'), Var('S')), p.true_case, p.false_case))
-            new_plist.append(Ite(And(Var('B'), Var('B')), p.true_case, p.false_case))
-            new_plist.append(Ite(Not(Var('B')), p.true_case, p.false_case))
+            new_plist.append(Lt(Var('S'), Var('S')))
+            new_plist.append(And(Var('B'), Var('B')))
+            new_plist.append(Not(Var('B')))
         return new_plist
 
 
