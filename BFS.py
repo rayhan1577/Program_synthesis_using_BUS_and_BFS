@@ -215,7 +215,7 @@ class BreadthFirstSearch():
                             print("Suitable Program:" ,i.toString())
                             print("Program Generated: ", prog_generated)
                             print("program evaluated: ", prog_evaluated)
-                            return 0
+                            return
 
 
     def iscomplete(self,prog):
