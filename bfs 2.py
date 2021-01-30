@@ -1,3 +1,4 @@
+import time
 class Node:
     def toString(self):
         raise Exception('Unimplemented method')
@@ -187,6 +188,8 @@ class BreadthFirstSearch():
 
     def synthesize(self, bound, integer_operations, integer_values, variables, input_output):
         output = set()
+        prog_generated=0
+        prog_evaluated=0
         open = [Var('S')]
         l1=[]
         for i in variables:
@@ -196,12 +199,22 @@ class BreadthFirstSearch():
         while (len(open) != 0):
             p = open.pop(0)
             children = findChildren(p)
+            prog_generated+=len(children)
             for i in children:
-                    print(i.toString())
+                flag=0
+                for j in open:
+                    if(i.toString()==j.toString()):
+                        flag=1
+                        break
+                if(flag==0):
                     open.append(i)
+                    print(i.toString())
                     if(self.iscomplete(i)):
+                        prog_evaluated+=1
                         if(self.iscorrect(i, input_output)):
                             print("Suitable Program:" ,i.toString())
+                            print("Program Generated: ", prog_generated)
+                            print("program evaluated: ", prog_evaluated)
                             return 0
 
 
@@ -223,6 +236,10 @@ class BreadthFirstSearch():
             return False
 
 synthesizer = BreadthFirstSearch()
+start = time.time()
 synthesizer.synthesize(3, [Lt, Ite], [1, 2], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
+end = time.time()
+print(f"Runtime of the program is {end - start}")
+print("#############################################\n")
 #synthesizer.synthesize(3, [And, Plus, Times, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
 #synthesizer.synthesize(3, [And, Plus, Times, Lt, Ite, Not], [-1, 5], ['x', 'y'], [{'x': 10, 'y': 7, 'out': 17},{'x': 4, 'y': 7, 'out': -7},{'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6},{'x': 1, 'y': 8, 'out': -8}])
