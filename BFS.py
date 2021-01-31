@@ -309,3 +309,4 @@ synthesizer.synthesize(3, [And, Plus, Times, Lt, Ite, Not], [-1, 5], ['x', 'y'],
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 print("#############################################\n")
+#
