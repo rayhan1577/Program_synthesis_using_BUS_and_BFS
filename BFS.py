@@ -130,55 +130,106 @@ class Times(Node):
         pass
 
 
-def findChildren(p):
+def findChildren(p,var_num,integer_operations):
     new_plist = []
     temp = []
     if (p.toString() == 'S'):
-        new_plist.append(Var('x'))
-        new_plist.append(Var('y'))
-        new_plist.append(Ite(Var('B'), p, p))
+        new_plist.extend(var_num)
+        if(Ite in integer_operations):
+            new_plist.append(Ite(Var('B'), p, p))
+        if(Plus in integer_operations):
+            new_plist.append(Plus(Var('S'), Var('S')))
+        if(Times in integer_operations):
+            new_plist.append(Times(Var('S'), Var('S')))
 
 
     elif (isinstance(p, Lt)):
-        if ('S' in p.left.toString()):
-            if (p.left.toString() == 'S'):
-                new_plist.append(Lt(Var('x'),p.right))
-                new_plist.append(Lt(Var('y'),p.right))
-            else:
-                temp.extend(findChildren(p.left))
-                for i in temp:
-                    if(not isinstance(i,Ite)):
-                         new_plist.append(Lt(i,p.left))
-        elif ('S' in p.right.toString()):
-                if (p.right.toString() == 'S'):
-                    new_plist.append(Lt(p.left,Var('x')))
-                    new_plist.append(Lt(p.left,Var('y')))
+        if(Lt in integer_operations):
+            if ('S' in p.left.toString()):
+                if (p.left.toString() == 'S'):
+                    for i in var_num:
+                        new_plist.append(Lt(i,p.right))
                 else:
-                    temp.extend(findChildren(p.left))
+                    temp.extend(findChildren(p.left,var_num,integer_operations))
                     for i in temp:
-                        if (not isinstance(i, Ite)):
-                             new_plist.append(Lt(p.left,i))
+                        if(not isinstance(i,Ite)):
+                             new_plist.append(Lt(i,p.right))
+            elif ('S' in p.right.toString()):
+                    if (p.right.toString() == 'S'):
+                        for i in var_num:
+                            new_plist.append(Lt(p.left, i))
+                    else:
+                        temp.extend(findChildren(p.right,integer_operations))
+                        for i in temp:
+                            if (not isinstance(i, Ite)):
+                                 new_plist.append(Lt(p.left,i))
 
 
     elif(isinstance(p,Ite)):
-        if(p.condition.toString()=="B"):
-            new_plist.append(Ite(Lt(Var('S'),Var('S')),Var('S'),Var('S')))
-        else:
-            temp.extend(findChildren(p.condition))
-            if(len(temp)!=0):
-                for i in temp:
-                    if (isinstance(i,Lt)):
-                         new_plist.append(Ite(i, p.true_case, p.false_case))
+        if (Ite in integer_operations):
+            if(p.condition.toString()=="B"):
+                new_plist.append(Ite(Lt(Var('S'),Var('S')),Var('S'),Var('S')))
             else:
-                temp.extend(findChildren(p.true_case))
-                if (len(temp) != 0):
+                temp.extend(findChildren(p.condition,var_num,integer_operations))
+                if(len(temp)!=0):
                     for i in temp:
-                          new_plist.append(Ite(p.condition, i, p.false_case))
+                        if (isinstance(i,Lt)):
+                             new_plist.append(Ite(i, p.true_case, p.false_case))
                 else:
-                    temp.extend(findChildren(p.false_case))
+                    temp.extend(findChildren(p.true_case,var_num,integer_operations))
                     if (len(temp) != 0):
                         for i in temp:
-                            new_plist.append(Ite(p.condition, p.true_case, i))
+                              new_plist.append(Ite(p.condition, i, p.false_case))
+                    else:
+                        temp.extend(findChildren(p.false_case,var_num,integer_operations))
+                        if (len(temp) != 0):
+                            for i in temp:
+                                new_plist.append(Ite(p.condition, p.true_case, i))
+
+
+    elif(isinstance(p,Plus)):
+        if(Plus in integer_operations):
+            if ('S' in p.left.toString()):
+                if (p.left.toString() == 'S'):
+                    for i in var_num:
+                        new_plist.append(Plus(i,p.right))
+                else:
+                    temp.extend(findChildren(p.left,var_num,integer_operations))
+                    for i in temp:
+                        if(not isinstance(i,Ite)):
+                             new_plist.append(Plus(i,p.right))
+            elif ('S' in p.right.toString()):
+                    if (p.right.toString() == 'S'):
+                        for i in var_num:
+                            new_plist.append(Plus(p.left, i))
+                    else:
+                        temp.extend(findChildren(p.right,integer_operations))
+                        for i in temp:
+                            if (not isinstance(i, Ite)):
+                                 new_plist.append(Plus(p.left,i))
+
+
+
+    elif (isinstance(p, Times)):
+        if (Times in integer_operations):
+            if ('S' in p.left.toString()):
+                if (p.left.toString() == 'S'):
+                    for i in var_num:
+                        new_plist.append(Times(i, p.right))
+                else:
+                    temp.extend(findChildren(p.left, var_num, integer_operations))
+                    for i in temp:
+                        if (not isinstance(i, Ite)):
+                            new_plist.append(Times(i, p.right))
+            elif ('S' in p.right.toString()):
+                if (p.right.toString() == 'S'):
+                    for i in var_num:
+                        new_plist.append(Times(p.left, i))
+                else:
+                    temp.extend(findChildren(p.right, integer_operations))
+                    for i in temp:
+                        if (not isinstance(i, Ite)):
+                            new_plist.append(Times(p.left, i))
 
     return new_plist
 
@@ -191,14 +242,14 @@ class BreadthFirstSearch():
         prog_generated=0
         prog_evaluated=0
         open = [Var('S')]
-        l1=[]
+        var_num=[]
         for i in variables:
-            l1.append(Var(i))
+            var_num.append(Var(i))
         for i in integer_values:
-            l1.append(Num(i))
+            var_num.append(Num(i))
         while (len(open) != 0):
             p = open.pop(0)
-            children = findChildren(p)
+            children = findChildren(p,var_num,integer_operations)
             prog_generated+=len(children)
             for i in children:
                 flag=0
@@ -237,9 +288,9 @@ class BreadthFirstSearch():
 
 synthesizer = BreadthFirstSearch()
 start = time.time()
-synthesizer.synthesize(3, [Lt, Ite], [1, 2], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
+synthesizer.synthesize(3, [ Lt, Ite], [1, 2], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 print("#############################################\n")
-#synthesizer.synthesize(3, [And, Plus, Times, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
+synthesizer.synthesize(3, [And, Plus, Times, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
 #synthesizer.synthesize(3, [And, Plus, Times, Lt, Ite, Not], [-1, 5], ['x', 'y'], [{'x': 10, 'y': 7, 'out': 17},{'x': 4, 'y': 7, 'out': -7},{'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6},{'x': 1, 'y': 8, 'out': -8}])
