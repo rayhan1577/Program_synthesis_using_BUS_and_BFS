@@ -9,7 +9,7 @@ class Node:
     def grow(self, plist, new_plist):
         pass
 
-
+#abc
 class Not(Node):
     def __init__(self, left):
         self.left = left
