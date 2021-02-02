@@ -69,7 +69,7 @@ class Lt(Node):
                     if(i!=j):
                         if (isinstance(j, Var) or isinstance(j, Num) or isinstance(j, Plus) or isinstance(j, Times)):
                                  new_plist.append(Lt(i,j))
-                                 #print("LT")
+
 
 
 

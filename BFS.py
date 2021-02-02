@@ -232,6 +232,10 @@ def findChildren(p,var_num,integer_operations):
                         if (not isinstance(i, Ite)):
                             new_plist.append(Times(p.left, i))
 
+
+    elif(isinstance(p,And)):
+        pass
+
     return new_plist
 
 
