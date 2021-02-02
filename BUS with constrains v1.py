@@ -61,11 +61,11 @@ class And(Node):
     def interpret(self, env):
         return self.left.interpret(env) and self.right.interpret(env)
 
-    def grow(plist, new_plist):
+    def grow(plist, new_plist,int_str,size):
             prog=find_and(plist)
             for i in prog:
                 for j in prog:
-                    if(i!=j):
+                    if(i!=j and (nodeCount(i,int_str)+nodeCount(j,int_str)<size)):
                         new_plist.append(And(i,j))
                         #print("and")
 
@@ -89,7 +89,6 @@ class Lt(Node):
 
     def grow(plist, new_plist,int_str,size):
         x=find_lt(plist,size)
-        print("hello")
         c_m=current_minimum(new_plist,int_str)
         for i in x:
             for j in x:
@@ -99,7 +98,7 @@ class Lt(Node):
 def find_lt(plist,size):
     temp=[]
     for i in plist:
-        if((isinstance(i,Var) or isinstance(i, Num) or isinstance(i, Plus) or isinstance(i,Times))):
+        if((isinstance(i,Var)  or isinstance(i, Plus) or isinstance(i,Times) or isinstance(i,Num))):
             temp.append(i)
     return temp
 
@@ -132,15 +131,34 @@ class Ite(Node):
             return self.false_case.interpret(env)
 
     def grow(plist, new_plist,int_str,size):
-        x=find_condition(plist)
-        y=find_case(plist)
-        c_m=current_minimum(new_plist,int_str)
+        min_of_newplist=-1
+        for i in new_plist:
+            if(nodeCount(i,int_str)>size):
+                min_of_newplist=nodeCount(i,int_str)
+                break
+        if(min_of_newplist==-1):
+            min_of_newplist=size+3
+        x=find_all(plist,min_of_newplist,int_str)
+        for i in x:
+            new_plist.append(Ite(i[0],i[1],i[2]))
+
+        """
         for i in x:
             for j in y:
                 for k in y:
-                    if(j!=k and (nodeCount(i,int_str)+nodeCount(j,int_str)+nodeCount(k,int_str)<=c_m)):
+                    #print("ite")
+                    if(j!=k and (nodeCount(i,int_str)+nodeCount(j,int_str)+nodeCount(k,int_str)<=min_of_newplist)):
                         new_plist.append(Ite(i, j, k))
-
+        """
+import itertools
+def find_all(plist,min_of_newplist, int_str):
+    x=find_condition(plist)
+    y=find_case(plist)
+    all_set=[]
+    for i in itertools.product(x, y, y):
+        if(nodeCount(i[0],int_str)+nodeCount(i[1],int_str)+nodeCount(i[1],int_str)<=min_of_newplist+4):
+            all_set.append(i)
+    return all_set
 
 
 
@@ -148,14 +166,14 @@ class Ite(Node):
 def find_case(plist):
     temp=[]
     for i in plist:
-        if(isinstance(i,Num) or isinstance(i,Var) or isinstance(i,Plus) or isinstance(i,Times) ):
+        if(isinstance(i,Num) or isinstance(i,Var) or isinstance(i,Plus) or isinstance(i,Times)or isinstance(i,Ite) ):
             temp.append(i)
     return temp
 
 def find_condition(plist):
     temp=[]
     for i in plist:
-        if(isinstance(i,Lt) or isinstance(i,And) or isinstance(i,Not)):
+        if(isinstance(i,Lt)):
             temp.append(i)
     return temp
 
@@ -173,10 +191,11 @@ class Plus(Node):
     def grow(plist, new_plist,a):
         for i in a:
             for j in plist:
-                new_plist.append(Plus(i, j))
+                if(isinstance(j, Num) or isinstance(j, Var)):
+                    new_plist.append(Plus(i, j))
 
 def nodeCount(p,int_str):
-    return sum(p.toString().count(x) for x in ("x", "y", "+", "*", "<", "and")) + sum(p.toString().count(x) for x in int_str)
+    return sum(p.toString().count(x) for x in ("x", "y", "+", "*", "<", "and",)) + sum(p.toString().count(x) for x in int_str)
 
 class Times(Node):
     def __init__(self, left, right):
@@ -193,7 +212,8 @@ class Times(Node):
     def grow(plist, new_plist,a):
         for i in a:
             for j in plist:
-                new_plist.append(Times(i, j))
+                if (isinstance(j, Num) or isinstance(j, Var)):
+                    new_plist.append(Times(i, j))
                         #print("times")
 
 
@@ -228,9 +248,9 @@ class BottomUpSearch():
         for op in integer_operations:
             if(op==Plus or op==Times):
                 op.grow(plist, new_plist,a)
-            elif(op==And or op==Not):
+            elif( op==Not):
                 op.grow(plist, new_plist)
-            elif(op==Ite or op==Lt):
+            elif(op==Ite or op==Lt or op==And):
                 op.grow(plist, new_plist,int_str,size)
                 
                 
@@ -251,8 +271,8 @@ class BottomUpSearch():
             if(f3==0):
                 plist.append(new_plist[i])
                 self.output.add(new_output)
-        for i in plist:
-            print(i.toString())
+        #for i in plist:
+         #   print(i.toString())
 
 
     def synthesize(self, bound, integer_operations, integer_values, variables, input_output):
@@ -294,9 +314,8 @@ class BottomUpSearch():
         flag=0
         Number_of_eval = 0
         for i in range(bound):
+            #print("Iteration: ", i)
             self.grow(plist, integer_operations,input_output,integer_values,a)
-            for i in plist:
-                print(i.toString(), file=self.sample)
             for j in range(Number_of_eval,len(plist)):
                 Number_of_eval=Number_of_eval+1
                 if(self.iscorrect(plist[j],input_output)):
@@ -335,7 +354,7 @@ print(f"Runtime of the program is {end - start}")
 
 print("#############################################")
 start = time.time()
-#synthesizer.synthesize(3, [And, Plus, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
+synthesizer.synthesize(6, [And, Plus,Times, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 
