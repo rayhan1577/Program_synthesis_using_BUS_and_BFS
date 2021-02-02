@@ -242,13 +242,14 @@ class BreadthFirstSearch():
         output = set()
         prog_generated=0
         prog_evaluated=0
+        sample = open('a.txt', 'w')
         _open = [Var('S')]
         var_num=[]
         for i in variables:
             var_num.append(Var(i))
         for i in integer_values:
             var_num.append(Num(i))
-            sample = open('a.txt', 'w')
+
         while (len(_open) != 0):
             p = _open.pop(0)
             children = findChildren(p,var_num,integer_operations)
@@ -298,14 +299,14 @@ print("#############################################\n")
 
 
 start = time.time()
-synthesizer.synthesize(3, [And, Plus, Times, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
+synthesizer.synthesize(3, [And, Plus, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 print("#############################################\n")
 
 
 start = time.time()
-synthesizer.synthesize(3, [And, Plus, Times, Lt, Ite, Not], [-1, 5], ['x', 'y'], [{'x': 10, 'y': 7, 'out': 17},{'x': 4, 'y': 7, 'out': -7},{'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6},{'x': 1, 'y': 8, 'out': -8}])
+#synthesizer.synthesize(3, [And, Plus, Times, Lt, Ite, Not], [-1, 5], ['x', 'y'], [{'x': 10, 'y': 7, 'out': 17},{'x': 4, 'y': 7, 'out': -7},{'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6},{'x': 1, 'y': 8, 'out': -8}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 print("#############################################\n")

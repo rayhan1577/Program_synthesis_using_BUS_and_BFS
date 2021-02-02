@@ -44,10 +44,11 @@ class And(Node):
         for i in plist:
             if (isinstance(i, Lt)):
                 for j in plist:
-                    if (isinstance(j, Lt)):
-                        #print(len(plist))
-                        new_plist.append(And(i,j))
-                        #print("and")
+                    if(i!=j):
+                        if (isinstance(j, Lt)):
+                            #print(len(plist))
+                            new_plist.append(And(i,j))
+                            #print("and")
 
 
 class Lt(Node):
@@ -97,7 +98,7 @@ class Ite(Node):
                 for j in plist:
                     if(isinstance(j,Var) or isinstance(j,Times) or isinstance(j,Ite)or isinstance(j,Plus)):
                         for k in plist:
-                            if(isinstance(k,Var) or isinstance(k,Times)or isinstance(k,Ite)):
+                            if(isinstance(k,Var) or isinstance(k,Times)or isinstance(k,Ite)or isinstance(j,Plus)):
                                 new_plist.append(Ite(i,j,k))
                                 #print("lte")
 
@@ -156,9 +157,9 @@ class Times(Node):
 
     def grow(plist, new_plist):
         for i in plist:
-            if (isinstance(i, Var) or isinstance(i, Plus) or isinstance(i, Times) or isinstance(i, Ite) ):
+            if (isinstance(i, Var) or isinstance(i, Plus) or isinstance(i, Times) or isinstance(i, Num) ):
                  for j in plist:
-                    if (isinstance(j, Var) or isinstance(j, Plus) or isinstance(j, Times)or isinstance(j, Num)or isinstance(j, Ite)):
+                    if (isinstance(j, Var) or isinstance(j, Plus) or isinstance(j, Times)or isinstance(j, Num)):
                         new_plist.append(Times(i, j))
                         #print("times")
 
@@ -172,23 +173,25 @@ class BottomUpSearch():
     def grow(self, plist, integer_operations,input_output):
         new_plist = []
         # grow tree
+
         for op in integer_operations:
             op.grow(plist, new_plist)
 
-        for i in range(0,len(new_plist)):
-            out=[]
-            for j in input_output:
-                out.append(new_plist[i].interpret(j))
-            new_output=tuple(out)
-            f3=0
-            for j in self.output:
-                if(j==new_output):
-                    f3=1
-                    break
-            if(f3==0):
-                plist.append(new_plist[i])
-                self.output.add(new_output)
-
+            for i in range(0,len(new_plist)):
+                out=[]
+                for j in input_output:
+                    out.append(new_plist[i].interpret(j))
+                new_output=tuple(out)
+                f3=0
+                for j in self.output:
+                    if(j==new_output):
+                        f3=1
+                        break
+                if(f3==0):
+                    plist.append(new_plist[i])
+                    self.output.add(new_output)
+        for i in plist:
+            print(i.toString())
 
     def synthesize(self, bound, integer_operations, integer_values, variables, input_output):
         plist = [Var("x"),Var("y")]
@@ -231,23 +234,21 @@ class BottomUpSearch():
 
 synthesizer = BottomUpSearch()
 start = time.time()
-synthesizer.synthesize(3, [Lt, Ite], [1, 2], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
+#synthesizer.synthesize(3, [Lt, Ite], [1, 2], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 
 
-print("#############################################")
+print("\n#############################################")
 start = time.time()
-synthesizer.synthesize(3, [And, Plus, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
+synthesizer.synthesize(2, [And, Plus, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 
 
-print("#############################################")
+print("\n#############################################")
 start = time.time()
-synthesizer.synthesize(3, [And, Plus, Times , Lt, Ite, Not], [-1, 5], ['x', 'y'], [{'x': 10, 'y': 7, 'out': 17},{'x': 4, 'y': 7, 'out': -7},{'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6},{'x': 1, 'y': 8, 'out': -8}])
+#synthesizer.synthesize(3, [And, Plus, Times , Lt, Ite, Not], [-1, 5], ['x', 'y'], [{'x': 10, 'y': 7, 'out': 17},{'x': 4, 'y': 7, 'out': -7},{'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6},{'x': 1, 'y': 8, 'out': -8}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
-
-
 
