@@ -15,7 +15,7 @@ class Not(Node):
         self.left = left
 
     def toString(self):
-        return 'not (' + self.left + ')'
+        return 'not (' + self.left.toString() + ')'
 
     def interpret(self, env):
         return not (self.left)
@@ -169,12 +169,18 @@ def findChildren(p,var_num,integer_operations):
     elif(isinstance(p,Ite)):
         if (Ite in integer_operations):
             if(p.condition.toString()=="B"):
-                new_plist.append(Ite(Lt(Var('S'),Var('S')),Var('S'),Var('S')))
+                if(Lt in integer_operations):
+                    new_plist.append(Ite(Lt(Var('S'),Var('S')),Var('S'),Var('S')))
+                if(And in integer_operations):
+                    new_plist.append(Ite(And(Var('B'), Var('B')), Var('S'), Var('S')))
+                if(Not in integer_operations):
+                    new_plist.append(Ite(Not(Var('B')), Var('S'), Var('S')))
+
             else:
                 temp.extend(findChildren(p.condition,var_num,integer_operations))
                 if(len(temp)!=0):
                     for i in temp:
-                        if (isinstance(i,Lt)):
+                        if (isinstance(i,Lt) or isinstance(i,And) or isinstance(i,Not)):
                              new_plist.append(Ite(i, p.true_case, p.false_case))
                 else:
                     temp.extend(findChildren(p.true_case,var_num,integer_operations))
@@ -233,8 +239,39 @@ def findChildren(p,var_num,integer_operations):
                             new_plist.append(Times(p.left, i))
 
 
+
     elif(isinstance(p,And)):
-        pass
+        if (And in integer_operations):
+                if (p.left.toString() == 'B'):
+                    new_plist.append(And(Lt(Var('S'),Var('S') ),p.right))
+                elif('S' in p.left.toString()):
+                    temp.extend(findChildren(p.left, var_num, integer_operations))
+                    for i in temp:
+                        if (isinstance(i, Lt)):
+                            new_plist.append(And(i, p.right))
+                elif ('B' in p.right.toString()):
+                    if (p.right.toString() == 'B'):
+                        new_plist.append(And( p.left,Lt(Var('S'), Var('S')),))
+                elif('S' in p.right.toString()):
+                    temp.extend(findChildren(p.right, var_num, integer_operations))
+                    for i in temp:
+                        if (isinstance(i, Lt)):
+                            new_plist.append(And( p.left,i))
+
+    elif(isinstance(p,Not)):
+        if(Not in integer_operations):
+            if(p.left.toString()=='B'):
+                if (Lt in integer_operations):
+                    new_plist.append(Not(Lt(Var('S'),Var('S'))))
+            else:
+                temp.extend(findChildren(p.left, var_num, integer_operations))
+
+                for i in temp:
+                    if (isinstance(i, Lt)):
+                        new_plist.append(Not(i))
+
+
+
 
     return new_plist
 
@@ -303,7 +340,7 @@ print("#############################################\n")
 
 
 start = time.time()
-synthesizer.synthesize(3, [And, Plus, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
+synthesizer.synthesize(3, [And, Plus,Times, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 print("#############################################\n")

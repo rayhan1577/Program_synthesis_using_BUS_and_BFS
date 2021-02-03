@@ -44,11 +44,8 @@ class And(Node):
         for i in plist:
             if (isinstance(i, Lt)):
                 for j in plist:
-                    if(i!=j):
-                        if (isinstance(j, Lt)):
-                            #print(len(plist))
+                    if(i!=j and isinstance(j, Lt)):
                             new_plist.append(And(i,j))
-                            #print("and")
 
 
 class Lt(Node):
@@ -64,10 +61,10 @@ class Lt(Node):
 
     def grow(plist, new_plist):
         for i in plist:
-            if(isinstance(i,Var) or isinstance(i,Num) or isinstance(i,Plus) or isinstance(i,Times)):
+            if(isinstance(i,Var) or isinstance(i,Num)  ):
                 for j in plist:
                     if(i!=j):
-                        if (isinstance(j, Var) or isinstance(j, Num) or isinstance(j, Plus) or isinstance(j, Times)):
+                        if (isinstance(j, Var) or isinstance(i,Num)  ):
                                  new_plist.append(Lt(i,j))
 
 
@@ -94,7 +91,7 @@ class Ite(Node):
 
     def grow(plist, new_plist):
         for i in plist:
-            if(isinstance(i,Lt) or isinstance(i,And) or isinstance(i,Not)):
+            if(isinstance(i,Lt) ):
                 for j in plist:
                     if(isinstance(j,Var) or isinstance(j,Times) or isinstance(j,Ite)or isinstance(j,Plus)):
                         for k in plist:
@@ -137,9 +134,9 @@ class Plus(Node):
 
     def grow(plist, new_plist):
         for i in plist:
-            if(isinstance(i,Var) or isinstance(i,Plus) or isinstance(i,Times)or isinstance(i, Ite)):
+            if(isinstance(i,Var) or isinstance(i,Num) ):
                 for j in plist:
-                    if (isinstance(j, Var) or isinstance(j, Plus) or isinstance(j, Times)or isinstance(j, Ite)):
+                    if (isinstance(j, Var)  ):
                         new_plist.append(Plus(i,j))
                         #print("plus")
 
@@ -157,9 +154,9 @@ class Times(Node):
 
     def grow(plist, new_plist):
         for i in plist:
-            if (isinstance(i, Var) or isinstance(i, Plus) or isinstance(i, Times) or isinstance(i, Num) ):
+            if (isinstance(i, Var) or isinstance(i, Num) ):
                  for j in plist:
-                    if (isinstance(j, Var) or isinstance(j, Plus) or isinstance(j, Times)or isinstance(j, Num)):
+                    if (isinstance(j, Var)):
                         new_plist.append(Times(i, j))
                         #print("times")
 
@@ -190,8 +187,8 @@ class BottomUpSearch():
                 if(f3==0):
                     plist.append(new_plist[i])
                     self.output.add(new_output)
-        for i in plist:
-            print(i.toString())
+     #   for i in plist:
+      #      print(i.toString())
 
     def synthesize(self, bound, integer_operations, integer_values, variables, input_output):
         plist = [Var("x"),Var("y")]
@@ -234,7 +231,7 @@ class BottomUpSearch():
 
 synthesizer = BottomUpSearch()
 start = time.time()
-#synthesizer.synthesize(3, [Lt, Ite], [1, 2], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
+synthesizer.synthesize(3, [Lt, Ite], [1, 2], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 
@@ -248,7 +245,7 @@ print(f"Runtime of the program is {end - start}")
 
 print("\n#############################################")
 start = time.time()
-#synthesizer.synthesize(3, [And, Plus, Times , Lt, Ite, Not], [-1, 5], ['x', 'y'], [{'x': 10, 'y': 7, 'out': 17},{'x': 4, 'y': 7, 'out': -7},{'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6},{'x': 1, 'y': 8, 'out': -8}])
+synthesizer.synthesize(3, [And, Plus, Times , Lt, Ite, Not], [-1, 5], ['x', 'y'], [{'x': 10, 'y': 7, 'out': 17},{'x': 4, 'y': 7, 'out': -7},{'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6},{'x': 1, 'y': 8, 'out': -8}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 
