@@ -153,37 +153,60 @@ class Ite(Node):
 
 
 
-
+marker=0
 
 
 import itertools
 
 
 def find_all(plist, min_of_newplist, int_str,new_plist):
+
     x = find_condition(plist)
-    y = find_case(plist)
+    y = find_true_case(plist,x,min_of_newplist,int_str)
+    #print(len(x))
+    #print(len(y))
+    z=find_combination(x,y,min_of_newplist,int_str)
+    for i in z:
+        for j in plist:
+            count=nodeCount(i[0], int_str) + nodeCount(i[1], int_str) + nodeCount(j,int_str)
+            if (count <= min_of_newplist and i[1].toString()!=j.toString()):
+            # print(i[0].toString(),i[1].toString(),i[2].toString(),count,min_of_newplist )
+                new_plist.append(Ite(i[0], i[1], j))
+
+    #print("minimum", min_of_newplist)
+    """    
+    print(len(y))
     all_set = []
+    xz=0
     for i in itertools.product(x, y, y):
+        xz=xz+1
         count=nodeCount(i[0], int_str) + nodeCount(i[1], int_str) + nodeCount(i[2], int_str)
+        
+    print("combination ", xz)
+    """
 
-        if ( count <= min_of_newplist):
-            #print(i[0].toString(),i[1].toString(),i[2].toString(),count,min_of_newplist )
-            new_plist.append(Ite(i[0], i[1], i[2]))
-
-
-
-def find_case(plist):
-    temp = []
-    for i in plist:
-        if (isinstance(i, Num) or isinstance(i, Var) or isinstance(i, Plus) or isinstance(i, Times) or isinstance(i,Ite)):
-            temp.append(i)
+def find_combination(x,y,min_of_newplist,int_str):
+    temp=[]
+    for i in x:
+        for j in y:
+            if(nodeCount(i,int_str)+nodeCount(j,int_str)<=min_of_newplist):
+                z=(i,j)
+                temp.append(z)
     return temp
 
+
+
+def find_true_case(plist,x,min_of_newplist,int_str):
+    temp = []
+    for i in plist:
+        if (isinstance(i, Num) or isinstance(i, Var) or isinstance(i, Plus) or isinstance(i, Times) or isinstance(i,Ite) ):
+            temp.append(i)
+    return temp
 
 def find_condition(plist):
     temp = []
     for i in plist:
-        if (isinstance(i, Lt) or  isinstance(i, And) or isinstance(i,Not)):
+        if (isinstance(i, Lt) or  isinstance(i, And)):
             temp.append(i)
     return temp
 
@@ -200,10 +223,18 @@ class Plus(Node):
         return self.left.interpret(env) + self.right.interpret(env)
 
     def grow(plist, new_plist, variables):
+        x=find_and_time(plist)
         for i in variables:
-            for j in plist:
-                if (isinstance(j, Num) or isinstance(j, Var)):
-                    new_plist.append(Plus(i, j))
+            for j in x:
+                new_plist.append(Plus(i, j))
+
+
+def find_and_time(plist):
+    temp=[]
+    for i in plist:
+        if (isinstance(i, Num) or isinstance(i, Var)):
+            temp.append(i)
+    return temp
 
 
 def nodeCount(p, int_str):
@@ -223,10 +254,10 @@ class Times(Node):
         return self.left.interpret(env) * self.right.interpret(env)
 
     def grow(plist, new_plist, variables):
+        x=find_and_time(plist)
         for i in variables:
-            for j in plist:
-                if (isinstance(j, Num) or isinstance(j, Var)):
-                    new_plist.append(Times(i, j))
+            for j in x:
+                new_plist.append(Times(i, j))
                     # print("times")
 
 
@@ -340,7 +371,7 @@ class BottomUpSearch():
 
 synthesizer = BottomUpSearch()
 start = time.time()
-synthesizer.synthesize(3, [Lt, Ite], [1, 2], ['x', 'y'],
+synthesizer.synthesize(6, [Lt, Ite], [1, 2], ['x', 'y'],
                        [{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
