@@ -99,7 +99,7 @@ class Lt(Node):
                 min_of_newplist = nodeCount(i, int_str)
                 break
         if (min_of_newplist == -1):
-            min_of_newplist = size + 3
+            min_of_newplist = size + 2
         for i in x:
             for j in x:
                 if (i != j and not isinstance(i,Num) and (nodeCount(i,int_str)+nodeCount(j, int_str)+1)<=min_of_newplist):
@@ -165,8 +165,8 @@ def find_all(plist, min_of_newplist, int_str,new_plist):
     all_set = []
     for i in itertools.product(x, y, y):
         count=nodeCount(i[0], int_str) + nodeCount(i[1], int_str) + nodeCount(i[2], int_str)
-        if ( count <= min_of_newplist):
 
+        if ( count <= min_of_newplist+4):
             #print(i[0].toString(),i[1].toString(),i[2].toString(),count,min_of_newplist )
             new_plist.append(Ite(i[0], i[1], i[2]))
 
@@ -199,15 +199,15 @@ class Plus(Node):
     def interpret(self, env):
         return self.left.interpret(env) + self.right.interpret(env)
 
-    def grow(plist, new_plist, a):
-        for i in a:
+    def grow(plist, new_plist, variables):
+        for i in variables:
             for j in plist:
-                if (isinstance(j, Num) or isinstance(j, Var)or isinstance(j, Plus) or isinstance(j, Times)):
+                if (isinstance(j, Num) or isinstance(j, Var)):
                     new_plist.append(Plus(i, j))
 
 
 def nodeCount(p, int_str):
-    return  sum(p.toString().count(x) for x in ("x", "y", "+", "*", "<", "and","not","if")) + sum(p.toString().count(x) for x in int_str)
+    return  sum(p.toString().count(x) for x in ("x", "y", "+", "*", "<", "and")) + sum(p.toString().count(x) for x in int_str)
 
 
 
@@ -222,10 +222,10 @@ class Times(Node):
     def interpret(self, env):
         return self.left.interpret(env) * self.right.interpret(env)
 
-    def grow(plist, new_plist, a):
-        for i in a:
+    def grow(plist, new_plist, variables):
+        for i in variables:
             for j in plist:
-                if (isinstance(j, Num) or isinstance(j, Var)or isinstance(j, Plus) or isinstance(j, Times)):
+                if (isinstance(j, Num) or isinstance(j, Var)):
                     new_plist.append(Times(i, j))
                     # print("times")
 
@@ -236,7 +236,7 @@ class BottomUpSearch():
         self.output = set()
         self.sample = open('a.txt', 'w')
 
-    def grow(self, plist, integer_operations, input_output, integer_values, a):
+    def grow(self, plist, integer_operations, input_output, integer_values, variables):
         new_plist = []
         max1 = 0
         max2 = 0
@@ -255,7 +255,7 @@ class BottomUpSearch():
         # grow tree
         for op in integer_operations:
             if (op == Plus or op == Times):
-                op.grow(plist, new_plist, a)
+                op.grow(plist, new_plist, variables)
             elif (op == Not):
                 op.grow(plist, new_plist)
             elif (op == Ite or op == Lt or op == And):
@@ -286,11 +286,10 @@ class BottomUpSearch():
         for i in integer_values:
             plist.append(Num(i))
 
-        a = []
+        var = []
         for i in variables:
-            a.append(Var(i))
-        for i in integer_values:
-            a.append(Num(i))
+            var.append(Var(i))
+
 
         for i in plist:
             out = []
@@ -316,8 +315,7 @@ class BottomUpSearch():
         flag = 0
         Number_of_eval = 0
         for i in range(bound):
-            print("Iteration: ", i)
-            self.grow(plist, integer_operations, input_output, integer_values, a)
+            self.grow(plist, integer_operations, input_output, integer_values, var)
             for j in range(Number_of_eval, len(plist)):
                 Number_of_eval = Number_of_eval + 1
                 if (self.iscorrect(plist[j], input_output)):
