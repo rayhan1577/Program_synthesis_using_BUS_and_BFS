@@ -348,7 +348,7 @@ class BottomUpSearch():
                     print("Program Generated: ", self.generated_program)
                     self.generated_program=0
                     print("Program Evaluated: ", Number_of_eval)
-                    print("Iteration Needed: ", i)
+                    print("Iteration Needed: ", i+1)
                     flag = 1
                     break
             if (flag == 1):
