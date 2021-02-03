@@ -166,7 +166,7 @@ def find_all(plist, min_of_newplist, int_str,new_plist):
     for i in itertools.product(x, y, y):
         count=nodeCount(i[0], int_str) + nodeCount(i[1], int_str) + nodeCount(i[2], int_str)
 
-        if ( count <= min_of_newplist+4):
+        if ( count <= min_of_newplist):
             #print(i[0].toString(),i[1].toString(),i[2].toString(),count,min_of_newplist )
             new_plist.append(Ite(i[0], i[1], i[2]))
 
@@ -183,7 +183,7 @@ def find_case(plist):
 def find_condition(plist):
     temp = []
     for i in plist:
-        if (isinstance(i, Lt)):
+        if (isinstance(i, Lt) or  isinstance(i, And) or isinstance(i,Not)):
             temp.append(i)
     return temp
 
@@ -235,6 +235,7 @@ class BottomUpSearch():
         self.f = 0
         self.output = set()
         self.sample = open('a.txt', 'w')
+        self.generated_program=0
 
     def grow(self, plist, integer_operations, input_output, integer_values, variables):
         new_plist = []
@@ -249,6 +250,7 @@ class BottomUpSearch():
         for i in plist:
             size_list.append(nodeCount(i, int_str))
         size = max(size_list)
+
         # programs to be expanded
         # n_plist=self.findPrograms(plist,integer_operations,integer_values)
 
@@ -262,7 +264,7 @@ class BottomUpSearch():
                 op.grow(plist, new_plist, int_str, size)
 
         # Max height of the AST in current itiration:
-
+        self.generated_program += len(new_plist)
         for i in range(0, len(new_plist)):
             out = []
             for j in input_output:
@@ -285,6 +287,7 @@ class BottomUpSearch():
             plist.append(Var(i))
         for i in integer_values:
             plist.append(Num(i))
+        self.generated_program += len(plist)
 
         var = []
         for i in variables:
@@ -301,17 +304,7 @@ class BottomUpSearch():
         for i in integer_values:
             int_str.append(str(i))
 
-        """
-        dict={}
-        for i in plist:
-            x=sum(i.toString().count(x) for x in ("x","y","+", "*", "<", "and","not","1","2")) + sum(i.toString().count(x) for x in int_str)
-            t=Num(x)
-            if t.toString() in dict.keys():
-                dict[t.toString()].append(i)
-            else:
-                dict[t.toString()]=[]
-                dict[t.toString()].append(i)
-        """
+
         flag = 0
         Number_of_eval = 0
         for i in range(bound):
@@ -321,7 +314,8 @@ class BottomUpSearch():
                 if (self.iscorrect(plist[j], input_output)):
                     print("\nProgram: ", end=" ")
                     print(plist[j].toString())
-                    print("Program Generated: ", len(plist))
+                    print("Program Generated: ", self.generated_program)
+                    self.generated_program=0
                     print("Program Evaluated: ", Number_of_eval)
                     print("Iteration Needed: ", i)
                     flag = 1
