@@ -67,7 +67,7 @@ class And(Node):
         prog = find_and(plist)
         for i in prog:
             for j in prog:
-                if (i != j and (nodeCount(i, int_str) + nodeCount(j, int_str) < size)):
+                if (i != j and (nodeCount(i, int_str) + nodeCount(j, int_str) <= size)):
                     new_plist.append(And(i, j))
                     # print("and")
 
