@@ -200,17 +200,21 @@ def findChildren(p,var_num,integer_operations):
                 if (p.left.toString() == 'S'):
                     for i in var_num:
                         new_plist.append(Plus(i,p.right))
+                    new_plist.append(Plus(Plus(Var('S'), Var('S')), p.right))
+                    new_plist.append(Plus(Times(Var('S'), Var('S')), p.right))
                 else:
                     temp.extend(findChildren(p.left,var_num,integer_operations))
                     for i in temp:
                         if(not isinstance(i,Ite)):
                              new_plist.append(Plus(i,p.right))
+                    new_plist.append(Plus(p.left, Plus(Var('S'), Var('S'))))
+                    new_plist.append(Plus(p.left,Times(Var('S'),Var('S'))))
             elif ('S' in p.right.toString()):
                     if (p.right.toString() == 'S'):
                         for i in var_num:
                             new_plist.append(Plus(p.left, i))
                     else:
-                        temp.extend(findChildren(p.right,integer_operations))
+                        temp.extend(findChildren(p.right,var_num,integer_operations))
                         for i in temp:
                             if (not isinstance(i, Ite)):
                                  new_plist.append(Plus(p.left,i))
@@ -223,6 +227,8 @@ def findChildren(p,var_num,integer_operations):
                 if (p.left.toString() == 'S'):
                     for i in var_num:
                         new_plist.append(Times(i, p.right))
+                        new_plist.append(Times( Plus(Var('S'), Var('S')),p.right))
+                        new_plist.append(Times( Times(Var('S'), Var('S')),p.right))
                 else:
                     temp.extend(findChildren(p.left, var_num, integer_operations))
                     for i in temp:
@@ -232,8 +238,10 @@ def findChildren(p,var_num,integer_operations):
                 if (p.right.toString() == 'S'):
                     for i in var_num:
                         new_plist.append(Times(p.left, i))
+                    new_plist.append(Times(p.left, Plus(Var('S'), Var('S'))))
+                    new_plist.append(Times(p.left,Times(Var('S'),Var('S'))))
                 else:
-                    temp.extend(findChildren(p.right, integer_operations))
+                    temp.extend(findChildren(p.right,var_num, integer_operations))
                     for i in temp:
                         if (not isinstance(i, Ite)):
                             new_plist.append(Times(p.left, i))

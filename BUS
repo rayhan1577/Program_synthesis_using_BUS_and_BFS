@@ -44,8 +44,10 @@ class And(Node):
         for i in plist:
             if (isinstance(i, Lt)):
                 for j in plist:
-                    if(i!=j and isinstance(j, Lt)):
-                            new_plist.append(And(i,j))
+                    if (isinstance(j, Lt)):
+                        #print(len(plist))
+                        new_plist.append(And(i,j))
+                        #print("and")
 
 
 class Lt(Node):
@@ -61,12 +63,12 @@ class Lt(Node):
 
     def grow(plist, new_plist):
         for i in plist:
-            if(isinstance(i,Var) or isinstance(i,Num)  ):
+            if(isinstance(i,Var) or isinstance(i,Num) or isinstance(i,Plus) or isinstance(i,Times)):
                 for j in plist:
                     if(i!=j):
-                        if (isinstance(j, Var) or isinstance(i,Num)  ):
+                        if (isinstance(j, Var) or isinstance(j, Num) or isinstance(j, Plus) or isinstance(j, Times)):
                                  new_plist.append(Lt(i,j))
-
+                                 #print("LT")
 
 
 
@@ -91,11 +93,11 @@ class Ite(Node):
 
     def grow(plist, new_plist):
         for i in plist:
-            if(isinstance(i,Lt) ):
+            if(isinstance(i,Lt) or isinstance(i,And) or isinstance(i,Not)):
                 for j in plist:
                     if(isinstance(j,Var) or isinstance(j,Times) or isinstance(j,Ite)or isinstance(j,Plus)):
                         for k in plist:
-                            if(isinstance(k,Var) or isinstance(k,Times)or isinstance(k,Ite)or isinstance(j,Plus)):
+                            if(isinstance(k,Var) or isinstance(k,Times)or isinstance(k,Ite)):
                                 new_plist.append(Ite(i,j,k))
                                 #print("lte")
 
@@ -134,9 +136,9 @@ class Plus(Node):
 
     def grow(plist, new_plist):
         for i in plist:
-            if(isinstance(i,Var) or isinstance(i,Num) ):
+            if(isinstance(i,Var) or isinstance(i,Plus) or isinstance(i,Times)):
                 for j in plist:
-                    if (isinstance(j, Var)  ):
+                    if (isinstance(j, Var) or isinstance(j, Plus) or isinstance(j, Times)):
                         new_plist.append(Plus(i,j))
                         #print("plus")
 
@@ -154,9 +156,9 @@ class Times(Node):
 
     def grow(plist, new_plist):
         for i in plist:
-            if (isinstance(i, Var) or isinstance(i, Num) ):
+            if (isinstance(i, Var) or isinstance(i, Plus) or isinstance(i, Times)or isinstance(i, Num)  ):
                  for j in plist:
-                    if (isinstance(j, Var)):
+                    if (isinstance(j, Var) or isinstance(j, Plus) or isinstance(j, Times)or isinstance(j, Num)):
                         new_plist.append(Times(i, j))
                         #print("times")
 
@@ -166,29 +168,74 @@ class BottomUpSearch():
     def __init__(self):
         self.f=0
         self.output= set()
-
     def grow(self, plist, integer_operations,input_output):
+
         new_plist = []
         # grow tree
-
         for op in integer_operations:
+            #new_plist = []
             op.grow(plist, new_plist)
 
-            for i in range(0,len(new_plist)):
-                out=[]
-                for j in input_output:
-                    out.append(new_plist[i].interpret(j))
-                new_output=tuple(out)
-                f3=0
-                for j in self.output:
-                    if(j==new_output):
-                        f3=1
-                        break
-                if(f3==0):
-                    plist.append(new_plist[i])
-                    self.output.add(new_output)
-     #   for i in plist:
-      #      print(i.toString())
+        size = []
+
+        """
+        # calculate maximum size of AST in the previous iteration
+        for j in range(len(plist)):
+            size.append(plist[j].toString().count("+") + plist[j].toString().count("*") + plist[j].toString().count("<") +plist[j].toString().count("and") + plist[j].toString().count("if") )
+        m2 = max(size)
+
+
+        # CALCULATE minimum number higher then the AST SIZE
+        size = []
+        for j in new_plist:
+            size.append(j.toString().count("+") + j.toString().count("*") + j.toString().count("<")  +j.toString().count("and")++ j.toString().count("if"))
+        m = min(size)
+
+        # set the maximum size of AST in current iteration
+        if (m <= m2):
+            if (m == m2):
+                x = m + 1
+            else:
+                x = m2 + 1
+            while (True):
+                if (x in size):
+                    m = x
+                    break
+                print("test")
+                x = x + 1
+        # print("lenght of newplist",len(new_plist))
+        # print("minimum value",m)
+
+        # remove AST having larger than the preset size
+        for j in list(new_plist):
+            if (j.toString().count("+") + j.toString().count("*") + j.toString().count("<")  + j.toString().count("and") + j.toString().count("if") > m+1):
+                new_plist.remove(j)
+        """
+        # insert programs from new_plist to p_list
+       # print("newplist size",len(new_plist))
+
+        for i in range(0,len(new_plist)):
+            out=[]
+            for j in input_output:
+                out.append(new_plist[i].interpret(j))
+            new_output=tuple(out)
+            f3=0
+            for j in self.output:
+                if(j==new_output):
+                    f3=1
+                    break
+            if(f3==0):
+                plist.append(new_plist[i])
+                self.output.add(new_output)
+                if (self.iscorrect(new_plist[i], input_output)):
+                    print("Program: ", end=" ")
+                    print(new_plist[i].toString())
+                    print("program Generated: ",len(plist)+len(new_plist))
+                    print("Program evaluated: ", len(plist))
+                    self.f=self.f+1
+                    self.output.clear()
+                    return
+
 
     def synthesize(self, bound, integer_operations, integer_values, variables, input_output):
         plist = [Var("x"),Var("y")]
@@ -199,21 +246,24 @@ class BottomUpSearch():
             for j in  input_output:
                 out.append(i.interpret(j))
             self.output.add(tuple(out))
+        #for i in integer_values:
+         #   plist.append(Num(i))
         flag=0
         Number_of_eval = 0
         for i in range(bound):
-            self.grow(plist, integer_operations,input_output)
-            for j in range(Number_of_eval,len(plist)):
-                Number_of_eval=Number_of_eval+1
-                if(self.iscorrect(plist[j],input_output)):
-                    print("\nProgram: ", end=" ")
-                    print(plist[j].toString())
-                    print("Program Generated: ", len(plist))
-                    print("Program Evaluated: ", Number_of_eval)
-                    flag=1
-                    break
-            if(flag==1):
-                flag=0
+            if(self.f==0):
+                self.grow(plist, integer_operations,input_output)
+                """
+                for j in range(Number_of_eval,len(plist)):
+                    Number_of_eval=Number_of_eval+1
+                    if(self.iscorrect(plist[j],input_output)):
+                        print("Program: ", end=" ")
+                        print(plist[j].toString())
+                        flag=1
+                        break
+                """
+            if(self.f==1):
+                self.f=0
                 break
 
 
@@ -228,7 +278,7 @@ class BottomUpSearch():
             return False
 
 
-
+import time
 synthesizer = BottomUpSearch()
 start = time.time()
 synthesizer.synthesize(3, [Lt, Ite], [1, 2], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
@@ -236,16 +286,19 @@ end = time.time()
 print(f"Runtime of the program is {end - start}")
 
 
-print("\n#############################################")
+print("#############################################")
 start = time.time()
-synthesizer.synthesize(2, [And, Plus, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
+synthesizer.synthesize(6, [And, Plus, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 
 
-print("\n#############################################")
+print("#############################################")
 start = time.time()
-synthesizer.synthesize(3, [And, Plus, Times , Lt, Ite, Not], [-1, 5], ['x', 'y'], [{'x': 10, 'y': 7, 'out': 17},{'x': 4, 'y': 7, 'out': -7},{'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6},{'x': 1, 'y': 8, 'out': -8}])
+synthesizer.synthesize(6, [And, Plus, Times , Lt, Ite, Not], [-1, 5], ['x', 'y'], [{'x': 10, 'y': 7, 'out': 17},{'x': 4, 'y': 7, 'out': -7},{'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6},{'x': 1, 'y': 8, 'out': -8}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
+
+
+
 
