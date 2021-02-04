@@ -95,7 +95,7 @@ class Lt(Node):
         x = find_lt(plist, size,dict)
         for i in x:
             for j in x:
-                if (i!= j and (nodeCount(i,int_str)+nodeCount(j,int_str)<size+1)):
+                if (i!= j and (nodeCount(i,int_str)+nodeCount(j,int_str)<=size)):
                     new_plist.append(Lt(i, j))
 
 
@@ -134,12 +134,13 @@ class Ite(Node):
         z=find_false_case(plist,dict,size,int_str)
         comb=itertools.product(x,y,z)
         for i in comb:
-            new_plist.append(Ite(i[0],i[1],i[2]))
+            if(nodeCount(i[0],int_str)+nodeCount(i[1],int_str)+nodeCount(i[2],int_str)<=size+3):
+                new_plist.append(Ite(i[0],i[1],i[2]))
 
 def find_false_case(plist,dict,size,int_str):
     temp=[]
     for i in plist:
-        if (isinstance(i, Num) or isinstance(i, Var) or isinstance(i, Plus) or isinstance(i,Times)):
+        if (isinstance(i, Num) or isinstance(i, Var) or isinstance(i, Plus) or isinstance(i,Times) and(nodeCount(i,int_str)<math.floor(size/3))):
             temp.append(i)
     return temp
 
@@ -148,7 +149,7 @@ def find_false_case(plist,dict,size,int_str):
 
 def find_true_case(plist,dict,size,int_str):
     temp = []
-    for i in range(1, size + 1):
+    for i in range(1, size-2):
         if (i in dict.keys()):
             temp.extend(dict[i])
         for i in list(temp):
@@ -158,7 +159,7 @@ def find_true_case(plist,dict,size,int_str):
 
 def find_condition(plist,dict,size):
     temp = []
-    for i in range(1, size + 1):
+    for i in range(1, size -2):
         if (i in dict.keys()):
             temp.extend(dict[i])
     for i in list(temp):
@@ -187,17 +188,19 @@ class Plus(Node):
         return self.left.interpret(env) + self.right.interpret(env)
 
     def grow(plist, new_plist, variables, int_str, size,dict):
-        x=find_programs(plist)
+        x=find_programs(plist,dict,size,int_str)
         for i in variables:
             for j in x:
                 new_plist.append(Plus(i, j))
-
-
-def find_programs(plist):
-    temp=[]
-    for i in plist:
-        if (isinstance(i, Num) or isinstance(i, Var) ):
-            temp.append(i)
+import math
+def find_programs(plist,dict,size,int_str):
+    temp = []
+    for i in range(1, math.floor(size/2)-1):
+        if (i in dict.keys()):
+            temp.extend(dict[i])
+        for i in list(temp):
+            if(isinstance(i,Lt) or isinstance(i,Not) or isinstance(i,And)):
+                temp.remove(i)
     return temp
 
 
@@ -218,7 +221,7 @@ class Times(Node):
         return self.left.interpret(env) * self.right.interpret(env)
 
     def grow(plist, new_plist, variables, int_str, size,dict):
-        x=find_programs(plist)
+        x=find_programs(plist,dict,size,int_str)
         for i in variables:
             for j in x:
                 new_plist.append(Times(i, j))
@@ -252,7 +255,7 @@ class BottomUpSearch():
         for op in integer_operations:
             op.grow(plist, new_plist, variables, int_str, self.size,dict)
 
-
+        # Max height of the AST in current itiration:
         self.generated_program += len(new_plist)
         for i in range(0, len(new_plist)):
             out = []
@@ -344,20 +347,20 @@ class BottomUpSearch():
 
 synthesizer = BottomUpSearch()
 start = time.time()
-synthesizer.synthesize(3, [Lt, Ite], [1, 2], ['x', 'y'],
+synthesizer.synthesize(10, [Lt, Ite], [1, 2], ['x', 'y'],
                        [{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 
 print("#############################################")
 start = time.time()
-synthesizer.synthesize(6, [And, Plus, Times, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
+synthesizer.synthesize(15, [And, Plus, Times, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 
 print("#############################################")
 start = time.time()
-synthesizer.synthesize(6, [And, Plus, Times, Lt, Ite, Not], [-1, 5], ['x', 'y'],[{'x': 10, 'y': 7, 'out': 17}, {'x': 4, 'y': 7, 'out': -7}, {'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6}, {'x': 1, 'y': 8, 'out': -8}])
+synthesizer.synthesize(15, [And, Plus, Times, Lt, Ite, Not], [-1, 5], ['x', 'y'],[{'x': 10, 'y': 7, 'out': 17}, {'x': 4, 'y': 7, 'out': -7}, {'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6}, {'x': 1, 'y': 8, 'out': -8}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 
