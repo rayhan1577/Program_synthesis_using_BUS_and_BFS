@@ -34,7 +34,7 @@ class Var(Node):
         return env[self.name]
 
 
-# abc
+
 class Not(Node):
     def __init__(self, left):
         self.left = left
@@ -49,7 +49,7 @@ class Not(Node):
         for i in plist:
             if (isinstance(i, Lt)):
                 new_plist.append(Not(i))
-                # print("not")
+
 
 
 class And(Node):
@@ -97,8 +97,7 @@ class Lt(Node):
             for j in x:
                 if (i!= j and (nodeCount(i,int_str)+nodeCount(j,int_str)<size+1)):
                     new_plist.append(Lt(i, j))
-       # for i in new_plist:
-        #    print(i.toString())
+
 
 
 def find_lt(plist, size,dict):
@@ -138,24 +137,14 @@ class Ite(Node):
             new_plist.append(Ite(i[0],i[1],i[2]))
 
 def find_false_case(plist,dict,size,int_str):
-    temp = []
-    for i in range(1, size + 1):
-        if (i in dict.keys()):
-            temp.extend(dict[i])
-        for i in list(temp):
-            if (isinstance(i, Lt) or isinstance(i, Not) or isinstance(i, And)):
-                temp.remove(i)
-    return temp
-
-
-
-    """
     temp=[]
     for i in plist:
         if (isinstance(i, Num) or isinstance(i, Var) or isinstance(i, Plus) or isinstance(i,Times)):
             temp.append(i)
     return temp
-    """
+
+
+
 
 def find_true_case(plist,dict,size,int_str):
     temp = []
@@ -333,6 +322,7 @@ class BottomUpSearch():
                     self.generated_program=0
                     print("Program Evaluated: ", Number_of_eval)
                     print("Iteration Needed: ", i+1)
+                    self.size=0
                     flag = 1
                     break
             if (flag == 1):
