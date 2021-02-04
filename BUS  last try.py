@@ -45,7 +45,7 @@ class Not(Node):
     def interpret(self, env):
         return not (self.left.interpret(env))
 
-    def grow(plist, new_plist):
+    def grow(plist, new_plist, variables, int_str, size,dict):
         for i in plist:
             if (isinstance(i, Lt)):
                 new_plist.append(Not(i))
@@ -63,7 +63,7 @@ class And(Node):
     def interpret(self, env):
         return self.left.interpret(env) and self.right.interpret(env)
 
-    def grow(plist, new_plist, int_str, size,dict):
+    def grow(plist, new_plist, variables, int_str, size,dict):
         prog = find_and(plist)
         for i in prog:
             for j in prog:
@@ -91,7 +91,7 @@ class Lt(Node):
     def interpret(self, env):
         return self.left.interpret(env) < self.right.interpret(env)
 
-    def grow(plist, new_plist, int_str, size,dict):
+    def grow(plist, new_plist, variables, int_str, size,dict):
         x = find_lt(plist, size,dict)
         for i in x:
             for j in x:
@@ -128,7 +128,7 @@ class Ite(Node):
         else:
             return self.false_case.interpret(env)
 
-    def grow(plist, new_plist, int_str, size,dict):
+    def grow(plist, new_plist, variables, int_str, size,dict):
         x=find_condition(plist,dict,size)
         y=find_true_case(plist,dict,size,int_str)
         z=find_false_case(plist,dict,size,int_str)
@@ -186,7 +186,7 @@ class Plus(Node):
     def interpret(self, env):
         return self.left.interpret(env) + self.right.interpret(env)
 
-    def grow(plist, new_plist, variables):
+    def grow(plist, new_plist, variables, int_str, size,dict):
         x=find_and_time(plist)
         for i in variables:
             for j in x:
@@ -217,7 +217,7 @@ class Times(Node):
     def interpret(self, env):
         return self.left.interpret(env) * self.right.interpret(env)
 
-    def grow(plist, new_plist, variables):
+    def grow(plist, new_plist, variables, int_str, size,dict):
         x=find_and_time(plist)
         for i in variables:
             for j in x:
@@ -246,17 +246,11 @@ class BottomUpSearch():
             size_list.append(nodeCount(i, int_str))
         size = max(size_list)
 
-        # programs to be expanded
-        # n_plist=self.findPrograms(plist,integer_operations,integer_values)
+
 
         # grow tree
         for op in integer_operations:
-            if (op == Plus or op == Times):
-                op.grow(plist, new_plist, variables)
-            elif (op == Not):
-                op.grow(plist, new_plist)
-            elif (op == Ite or op == Lt or op == And):
-                op.grow(plist, new_plist, int_str, self.size,dict)
+            op.grow(plist, new_plist, variables, int_str, self.size,dict)
 
         # Max height of the AST in current itiration:
         self.generated_program += len(new_plist)
@@ -283,24 +277,29 @@ class BottomUpSearch():
 
     def synthesize(self, bound, integer_operations, integer_values, variables, input_output):
         plist = []
+        #CREATE PROGRAM LIST WITH TERMINAL SYMBOLS
         for i in variables:
             plist.append(Var(i))
         for i in integer_values:
             plist.append(Num(i))
         self.generated_program += len(plist)
 
+        #CREATE LIST COMBINING INTEGER VALUES AND VARIABLES
         var = []
         for i in variables:
             var.append(Var(i))
         for i in integer_values:
             var.append(Num(i))
 
+        # CREATE TUPLE FOR OUTPUT
         for i in plist:
             out = []
             for j in input_output:
                 out.append(i.interpret(j))
             self.output.add(tuple(out))
 
+
+        #CREATE DICTIONARY
         int_str = []
         for i in integer_values:
             int_str.append(str(i))
@@ -345,7 +344,7 @@ class BottomUpSearch():
 
 synthesizer = BottomUpSearch()
 start = time.time()
-synthesizer.synthesize(10, [Lt, Ite], [1, 2], ['x', 'y'],
+synthesizer.synthesize(3, [Lt, Ite], [1, 2], ['x', 'y'],
                        [{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
