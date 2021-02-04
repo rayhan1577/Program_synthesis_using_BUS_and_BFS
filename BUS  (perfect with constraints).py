@@ -187,16 +187,16 @@ class Plus(Node):
         return self.left.interpret(env) + self.right.interpret(env)
 
     def grow(plist, new_plist, variables, int_str, size,dict):
-        x=find_and_time(plist)
+        x=find_programs(plist)
         for i in variables:
             for j in x:
                 new_plist.append(Plus(i, j))
 
 
-def find_and_time(plist):
+def find_programs(plist):
     temp=[]
     for i in plist:
-        if (isinstance(i, Num) or isinstance(i, Var)):
+        if (isinstance(i, Num) or isinstance(i, Var) ):
             temp.append(i)
     return temp
 
@@ -218,7 +218,7 @@ class Times(Node):
         return self.left.interpret(env) * self.right.interpret(env)
 
     def grow(plist, new_plist, variables, int_str, size,dict):
-        x=find_and_time(plist)
+        x=find_programs(plist)
         for i in variables:
             for j in x:
                 new_plist.append(Times(i, j))
