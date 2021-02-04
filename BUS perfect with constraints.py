@@ -170,14 +170,6 @@ def find_condition(plist,dict,size):
     return temp
 
 
-
-
-
-
-
-
-
-
 class Plus(Node):
     def __init__(self, left, right):
         self.left = left
@@ -195,6 +187,7 @@ class Plus(Node):
             for j in x:
                 new_plist.append(Plus(i, j))
 
+
 def find_programs(plist,dict,size,int_str):
     temp = []
     for i in range(1, math.floor(size/2)-1):
@@ -207,7 +200,7 @@ def find_programs(plist,dict,size,int_str):
 
 
 def nodeCount(p, int_str):
-    return  sum(p.toString().count(x) for x in ("x", "y", "+", "*", "<", "and")) + sum(p.toString().count(x) for x in int_str)
+    return sum(p.toString().count(x) for x in ("x", "y", "+", "*", "<", "and","not")) + sum(p.toString().count(x) for x in int_str)
 
 
 
@@ -227,7 +220,6 @@ class Times(Node):
         for i in variables:
             for j in x:
                 new_plist.append(Times(i, j))
-                    # print("times")
 
 
 class BottomUpSearch():
@@ -257,7 +249,6 @@ class BottomUpSearch():
         for op in integer_operations:
             op.grow(plist, new_plist, variables, int_str, self.size,dict)
 
-        # Max height of the AST in current itiration:
         self.generated_program += len(new_plist)
         for i in range(0, len(new_plist)):
             out = []
