@@ -320,7 +320,7 @@ class BottomUpSearch():
                 if (self.iscorrect(plist[j], input_output)):
                     print("\nProgram: ", end=" ")
                     print(plist[j].toString())
-                    print("Program Generated: ", self.generated_program)
+                    print("Program Generated: ", len(plist))
                     self.generated_program=0
                     print("Program Evaluated: ", Number_of_eval)
                     print("Iteration Needed: ", i+1)
