@@ -1,4 +1,6 @@
 import time
+import itertools
+import math
 
 
 class Node:
@@ -171,7 +173,7 @@ def find_condition(plist,dict,size):
 
 
 
-import itertools
+
 
 
 
@@ -192,7 +194,7 @@ class Plus(Node):
         for i in variables:
             for j in x:
                 new_plist.append(Plus(i, j))
-import math
+
 def find_programs(plist,dict,size,int_str):
     temp = []
     for i in range(1, math.floor(size/2)-1):
@@ -347,8 +349,7 @@ class BottomUpSearch():
 
 synthesizer = BottomUpSearch()
 start = time.time()
-synthesizer.synthesize(10, [Lt, Ite], [1, 2], ['x', 'y'],
-                       [{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
+synthesizer.synthesize(10, [Lt, Ite], [1, 2], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 
