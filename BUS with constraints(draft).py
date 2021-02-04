@@ -214,7 +214,7 @@ class BottomUpSearch():
     def __init__(self):
         self.f=0
         self.output= set()
-        self.sample = open('a.txt', 'w')
+        self.sample = open('Expression of BFS.txt', 'w')
 
 
     def grow(self, plist, integer_operations,input_output,integer_values,a):

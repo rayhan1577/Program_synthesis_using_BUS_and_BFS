@@ -291,7 +291,7 @@ class BreadthFirstSearch():
         output = set()
         prog_generated=0
         prog_evaluated=0
-        sample = open('a.txt', 'w')
+        sample = open('Expression of BFS.txt', 'w')
         _open = [Var('S')]
         var_num=[]
         for i in variables:
