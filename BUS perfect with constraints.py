@@ -320,6 +320,7 @@ class BottomUpSearch():
                     self.size=0
                     flag = 1
                     break
+                    #
             if (flag == 1):
                 break
         if (flag == 0):
