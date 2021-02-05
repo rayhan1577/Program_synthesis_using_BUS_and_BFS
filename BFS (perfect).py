@@ -280,8 +280,8 @@ def findChildren(p,var_num,integer_operations):
             else:
 
                 temp.extend(findChildren(p.left, var_num, integer_operations))
-                if (p.toString() == "not ((B and B))"):
-                    print(len(temp))
+                #if (p.toString() == "not ((B and B))"):
+                 #   print(len(temp))
 
                 for i in temp:
                     if (isinstance(i, And) or isinstance(i,Lt)):
@@ -302,15 +302,21 @@ class BreadthFirstSearch():
         prog_evaluated=0
         sample = open('Expression of BFS.txt', 'w')
         _open = [Var('S')]
+        print(_open[0].toString(), file=sample)
         var_num=[]
         for i in variables:
             var_num.append(Var(i))
         for i in integer_values:
             var_num.append(Num(i))
-
-        while (len(_open) != 0):
+        iteration=0
+        marker=len(var_num)
+        tracker=1
+        while (len(_open) != 0 and iteration<=bound ):
             p = _open.pop(0)
-            children = findChildren(p,var_num,integer_operations)
+            children = findChildren(p, var_num, integer_operations)
+
+
+
             prog_generated+=len(children)
             for i in children:
                 flag=0
@@ -329,6 +335,17 @@ class BreadthFirstSearch():
                             print("program evaluated: ", prog_evaluated)
                             sample.close()
                             return
+            tracker += 1
+            if(tracker==marker):
+                iteration+=1
+                marker=len(_open)
+                tracker=0
+        if(iteration==bound+1):
+            print("No suitable program found in the bound")
+            print("Program Generated: ", prog_generated)
+            print("program evaluated: ", prog_evaluated)
+
+
 
 
     def iscomplete(self,prog):
@@ -350,21 +367,21 @@ class BreadthFirstSearch():
 
 synthesizer = BreadthFirstSearch()
 start = time.time()
-synthesizer.synthesize(3, [ Lt, Ite], [1, 2], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
+synthesizer.synthesize(5, [ Lt, Ite], [1, 2], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 print("#############################################\n")
 
 
 start = time.time()
-#synthesizer.synthesize(3, [And, Plus,Times, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
+synthesizer.synthesize(6, [And, Plus,Times, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 print("#############################################\n")
 
 
 start = time.time()
-synthesizer.synthesize(3, [And,Plus, Times, Lt, Ite,Not], [-1, 5], ['x', 'y'], [{'x': 10, 'y': 7, 'out': 17},{'x': 4, 'y': 7, 'out': -7},{'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6},{'x': 1, 'y': 8, 'out': -8}])
+synthesizer.synthesize(6, [And,Plus, Times, Lt, Ite,Not], [-1, 5], ['x', 'y'], [{'x': 10, 'y': 7, 'out': 17},{'x': 4, 'y': 7, 'out': -7},{'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6},{'x': 1, 'y': 8, 'out': -8}])
 end = time.time()
 print(f"Runtime of the program is {end - start}")
 print("#############################################\n")
