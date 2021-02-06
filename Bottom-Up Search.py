@@ -136,8 +136,9 @@ class Ite(Node):
         z=find_false_case(plist,dict,size,int_str)
         comb=itertools.product(x,y,z)
         for i in comb:
-            if(nodeCount(i[0],int_str)+nodeCount(i[1],int_str)+nodeCount(i[2],int_str)<=size+3):
+            if(nodeCount(i[0],int_str)+nodeCount(i[1],int_str)+nodeCount(i[2],int_str)<=size+3): # value 3 is used here by trial and error
                 new_plist.append(Ite(i[0],i[1],i[2]))
+
 
 def find_false_case(plist,dict,size,int_str):
     temp=[]
@@ -188,7 +189,7 @@ class Plus(Node):
                 new_plist.append(Plus(i, j))
 
 
-def find_programs(plist,dict,size,int_str):
+def find_programs(plist,dict,size,int_str): #find the programs which can be combined in Plus and Times
     temp = []
     for i in range(1, math.floor(size/2)-1):
         if (i in dict.keys()):
@@ -199,7 +200,7 @@ def find_programs(plist,dict,size,int_str):
     return temp
 
 
-def nodeCount(p, int_str):
+def nodeCount(p, int_str): #count the number of nodes in AST of a program
     return sum(p.toString().count(x) for x in ("x", "y", "+", "*", "<", "and","not")) + sum(p.toString().count(x) for x in int_str)
 
 
@@ -316,13 +317,10 @@ class BottomUpSearch():
                     print("Program Generated: ",  len(plist))
                     self.generated_program=0
                     print("Program Evaluated: ", Number_of_eval)
-                    print("Iteration Needed: ", i+1)
+                    #print("Iteration Needed: ", i+1)
                     self.size=0
                     flag = 1
                     break
-            #print("Iteration: ", (i+1))
-            #print("Genarated Program: ", len(plist))
-            #print("Evaluated Program: ", Number_of_eval)
 
             if (flag == 1):
                 break
@@ -346,17 +344,17 @@ synthesizer = BottomUpSearch()
 start = time.time()
 synthesizer.synthesize(10, [Lt, Ite], [1, 2], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 3}])
 end = time.time()
-print(f"Runtime of the program is {end - start}")
+print(f"Execution time: {end - start}")
 
 print("#############################################")
 start = time.time()
-synthesizer.synthesize(15, [And, Plus, Times, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
+synthesizer.synthesize(10, [And, Plus, Times, Lt, Ite, Not], [10], ['x', 'y'],[{'x': 5, 'y': 10, 'out': 5}, {'x': 10, 'y': 5, 'out': 5}, {'x': 4, 'y': 3, 'out': 4},{'x': 3, 'y': 4, 'out': 4}])
 end = time.time()
-print(f"Runtime of the program is {end - start}")
+print(f"Execution time: {end - start}")
 
 print("#############################################")
 start = time.time()
-synthesizer.synthesize(15, [And, Plus, Times, Lt, Ite, Not], [-1, 5], ['x', 'y'],[{'x': 10, 'y': 7, 'out': 17}, {'x': 4, 'y': 7, 'out': -7}, {'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6}, {'x': 1, 'y': 8, 'out': -8}])
+synthesizer.synthesize(10, [And, Plus, Times, Lt, Ite, Not], [-1, 5], ['x', 'y'],[{'x': 10, 'y': 7, 'out': 17}, {'x': 4, 'y': 7, 'out': -7}, {'x': 10, 'y': 3, 'out': 13},{'x': 1, 'y': -7, 'out': -6}, {'x': 1, 'y': 8, 'out': -8}])
 end = time.time()
-print(f"Runtime of the program is {end - start}")
+print(f"Execution time: {end - start}")
 
