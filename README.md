@@ -28,7 +28,7 @@ To Run Breadth_first_search: python3 BFS.py
 # Output
 ---
 - output of Bottom up search will be shown on terminal
-- Output of BFS will also be shon on terminal side by side generated expression will be available at output.txt
+- Output of BFS will also be shon on terminal side by side generated expression will be available at expression_of_bfs.txt
 ---
 
 # Report
